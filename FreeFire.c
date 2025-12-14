@@ -10,7 +10,14 @@
 // Este programa simula o gerenciamento avançado de uma mochila com componentes coletados durante a fuga de uma ilha.
 // Ele introduz ordenação com critérios e busca binária para otimizar a gestão dos recursos.
 
-
+// Struct Item:
+// Representa um componente com nome, tipo, quantidade e prioridade (1 a 5).
+// A prioridade indica a importância do item na montagem do plano de fuga.
+typedef struct {
+    char nome[MAX_STR_LEN];
+    char tipo[MAX_STR_LEN];
+    int quantidade;
+} Item;
 
 // Prototipos funções
 void limparTela();
@@ -18,6 +25,7 @@ void exibirMenu();
 void inserirItem();
 void removerItem();
 void listarItems();
+int buscaSequencialPorNome(Item mochila[], int tamanho, const char* nome);
 
 int main() {
     // Menu principal com opções:
@@ -38,14 +46,7 @@ int main() {
     return 0;
 }
 
-// Struct Item:
-// Representa um componente com nome, tipo, quantidade e prioridade (1 a 5).
-// A prioridade indica a importância do item na montagem do plano de fuga.
-typedef struct {
-    char nome[MAX_STR_LEN];
-    char tipo[MAX_STR_LEN];
-    int quantidade;
-} Item;
+
 
 // Enum CriterioOrdenacao:
 // Define os critérios possíveis para a ordenação dos items (nome, tipo ou prioridade).
@@ -92,9 +93,32 @@ void exibirMenu() {
         listarItems();
         break;
 
-    case 4:
-        /* 4. "Buscar item por nome" */
+    case 4: {
+        if (numItems == 0) {
+            printf("\nMochila vazia!\n");
+            break; 
+        }
+        
+        char nomeBusca[MAX_STR_LEN];
+        printf("\n--- BUSCAR ITEM ---\n");
+        printf("Digite o nome do item: ");
+        fgets(nomeBusca, MAX_STR_LEN, stdin);
+        nomeBusca[strcspn(nomeBusca, "\n")] = '\0';
+
+        int resultado = buscaSequencialPorNome(mochila, numItems, nomeBusca);
+
+        if (resultado != -1) {
+            printf("\nItem encontrado no indice %d:\n", resultado);
+            printf("Nome: %s\n", mochila[resultado].nome);
+            printf("Tipo: %s\n", mochila[resultado].tipo);
+            printf("Quantidade: %d\n", mochila[resultado].quantidade);
+        } else {
+            printf("\nItem '%s' não encontrado!\n", nomeBusca);
+        }
         break;
+    }
+
+   
 
     case 0:
         printf("Saindo...\n");
@@ -158,7 +182,7 @@ void removerItem() {
     nomeBusca[strcspn(nomeBusca, "\n")] = '\0';
 
     // variavel indiceEncontrado para ser na busca do item pelo nome
-    int indiceEncontrado = 1;
+    int indiceEncontrado = -1;
     // Busca o item pelo nome
     for (int i = 0; i < numItems; i++) {
         if (strcmp(mochila[i].nome, nomeBusca) == 0) {
@@ -216,3 +240,11 @@ void listarItems() {
 // Realiza busca binária por nome, desde que a mochila esteja ordenada por nome.
 // Se encontrar, exibe os dados do item buscado.
 // Caso contrário, informa que não encontrou o item.
+int buscaSequencialPorNome(Item mochila[], int tamanho, const char* nome) {
+    for (int i = 0; i < tamanho; i++) {
+        if (strcmp(mochila[i].nome, nome) == 0) {
+            return i;  // Encontrou!
+        }
+    }
+    return -1;  // Não encontrou!
+}
